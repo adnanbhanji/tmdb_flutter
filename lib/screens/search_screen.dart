@@ -129,11 +129,18 @@ class _SearchScreenState extends State<SearchScreen> {
           Consumer<AppState>(
             builder: (context, appState, child) {
               return Wrap(
+                spacing: 8.0,
                 children: appState.recentSearches
                     .map((search) => Chip(
-                          label: Text(search),
+                          label: GestureDetector(
+                            onTap: () {
+                              _searchController.text = search;
+                              _performSearch();
+                            },
+                            child: Text(search),
+                          ),
                           onDeleted: () {
-                            // Add functionality to remove search
+                            appState.removeFromRecentSearches(search);
                           },
                         ))
                     .toList(),

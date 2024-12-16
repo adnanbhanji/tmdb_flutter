@@ -125,4 +125,14 @@ class AppState extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  void removeFromRecentSearches(String query) {
+    _recentSearches.remove(query);
+    notifyListeners();
+    _saveRecentSearches();
+  }
+
+  void _saveRecentSearches() {
+    _prefs.setStringList('recentSearches', _recentSearches);
+  }
 }
