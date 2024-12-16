@@ -28,14 +28,33 @@ class TMDBService {
 
   Future<List<dynamic>> search(String query, String type,
       {int page = 1}) async {
-    final response = await _dio.get(
-      '/search/$type',
-      queryParameters: {
-        'query': query,
-        'page': page,
-      },
-    );
-    return response.data['results'];
+    try {
+      final response = await _dio.get(
+        '/search/$type',
+        queryParameters: {
+          'query': query,
+          'page': page,
+        },
+      );
+
+      final results = response.data['results'] as List;
+
+      // Debug print to check the data
+      print('Search Results for $type:');
+      results.forEach((item) {
+        if (type == 'person') {
+          print('Person: ${item['name']}, Profile: ${item['profile_path']}');
+        } else {
+          print(
+              'Title: ${item['title'] ?? item['name']}, Poster: ${item['poster_path']}');
+        }
+      });
+
+      return results;
+    } catch (e) {
+      print('Search Error: $e');
+      return [];
+    }
   }
 
   Future<Map<String, dynamic>> getMovieDetails(int movieId) async {

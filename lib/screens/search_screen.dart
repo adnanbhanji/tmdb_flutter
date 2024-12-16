@@ -19,13 +19,23 @@ class _SearchScreenState extends State<SearchScreen> {
   final TextEditingController _searchController = TextEditingController();
   final TMDBService _tmdbService = TMDBService();
   List<dynamic> _searchResults = [];
+  bool _isLoading = false;
   String _selectedType = 'movie';
   int _currentPage = 1;
-  bool _isLoading = false;
   String _currentQuery = '';
+  bool _mounted = true;
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _mounted = false;
+    super.dispose();
+  }
 
   Future<void> _performSearch({bool resetResults = true}) async {
     if (_searchController.text.isEmpty) return;
+
+    if (!_mounted) return; // Check if widget is still mounted
 
     setState(() {
       _isLoading = true;
@@ -43,30 +53,30 @@ class _SearchScreenState extends State<SearchScreen> {
         page: _currentPage,
       );
 
-      final formattedResults = results.map((item) {
-        if (_selectedType == 'movie') {
-          return Movie.fromJson(item);
-        } else if (_selectedType == 'tv') {
-          return TVShow.fromJson(item);
-        }
-        return item;
-      }).toList();
+      if (!_mounted) return; // Check again after async operation
 
       setState(() {
         if (resetResults) {
-          _searchResults = formattedResults;
+          _searchResults = results;
         } else {
-          _searchResults.addAll(formattedResults);
+          _searchResults.addAll(results);
         }
         _isLoading = false;
       });
 
-      context.read<AppState>().addToRecentSearches(_currentQuery);
+      if (_mounted) {
+        // Check before updating state
+        context.read<AppState>().addToRecentSearches(_currentQuery);
+      }
     } catch (e) {
+      if (!_mounted) return;
+
       setState(() => _isLoading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: ${e.toString()}')),
-      );
+      if (_mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: ${e.toString()}')),
+        );
+      }
     }
   }
 
@@ -79,46 +89,58 @@ class _SearchScreenState extends State<SearchScreen> {
 
   Widget _buildSearchResult(dynamic item) {
     if (_selectedType == 'person') {
+      final profilePath = item['profile_path'];
+      final name = item['name'] ?? 'Unknown';
+      final department = item['known_for_department'] ?? '';
+
       return GestureDetector(
         onTap: () => context.go('/person/${item['id']}'),
         child: Card(
           child: ListTile(
-            leading: item['profile_path'] != null
-                ? CachedNetworkImage(
-                    imageUrl:
-                        'https://image.tmdb.org/t/p/w200${item['profile_path']}',
-                    width: 50,
-                    height: 50,
-                    fit: BoxFit.cover,
-                    errorWidget: (context, url, error) =>
-                        const CircleAvatar(child: Icon(Icons.person)),
-                  )
-                : const CircleAvatar(child: Icon(Icons.person)),
-            title: Text(item['name'] ?? 'Unknown'),
-            subtitle: Text(item['known_for_department'] ?? ''),
+            leading: profilePath == null
+                ? const CircleAvatar(child: Icon(Icons.person))
+                : ClipOval(
+                    child: CachedNetworkImage(
+                      imageUrl: 'https://image.tmdb.org/t/p/w200$profilePath',
+                      width: 50,
+                      height: 50,
+                      fit: BoxFit.cover,
+                      errorWidget: (_, __, ___) =>
+                          const CircleAvatar(child: Icon(Icons.person)),
+                      placeholder: (_, __) => const CircleAvatar(
+                          child: CircularProgressIndicator()),
+                    ),
+                  ),
+            title: Text(name),
+            subtitle: Text(department),
           ),
         ),
       );
     } else {
+      final posterPath = item.posterPath;
+      final title = _selectedType == 'tv' ? item.name : item.title;
+
       return GestureDetector(
-        onTap: () {
-          context.go('/${_selectedType}/${item.id}');
-        },
+        onTap: () => context.go('/${_selectedType}/${item.id}'),
         child: Card(
           child: Column(
             children: [
-              if (item.posterPath != null)
-                Expanded(
-                  child: CachedNetworkImage(
-                    imageUrl:
-                        'https://image.tmdb.org/t/p/w500${item.posterPath}',
-                    fit: BoxFit.cover,
-                  ),
-                ),
+              Expanded(
+                child: posterPath == null
+                    ? const Center(child: Icon(Icons.movie, size: 50))
+                    : CachedNetworkImage(
+                        imageUrl: 'https://image.tmdb.org/t/p/w500$posterPath',
+                        fit: BoxFit.cover,
+                        errorWidget: (_, __, ___) =>
+                            const Icon(Icons.movie, size: 50),
+                        placeholder: (_, __) =>
+                            const Center(child: CircularProgressIndicator()),
+                      ),
+              ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Text(
-                  _selectedType == 'tv' ? item.name : item.title,
+                  title ?? 'Unknown',
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   textAlign: TextAlign.center,
