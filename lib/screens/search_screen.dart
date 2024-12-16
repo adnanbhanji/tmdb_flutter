@@ -117,11 +117,11 @@ class _SearchScreenState extends State<SearchScreen> {
         ),
       );
     } else {
-      final posterPath = item.posterPath;
-      final title = _selectedType == 'tv' ? item.name : item.title;
+      final posterPath = item['poster_path'];
+      final title = _selectedType == 'tv' ? item['name'] : item['title'];
 
       return GestureDetector(
-        onTap: () => context.go('/${_selectedType}/${item.id}'),
+        onTap: () => context.go('/${_selectedType}/${item['id']}'),
         child: Card(
           child: Column(
             children: [
