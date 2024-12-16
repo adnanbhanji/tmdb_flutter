@@ -86,37 +86,42 @@ class _ActorScreenState extends State<ActorScreen> {
                       style:
                           TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                   SizedBox(
-                    height: 200,
+                    height: 220,
                     child: ListView.builder(
                       scrollDirection: Axis.horizontal,
                       itemCount: _credits?.take(5).length ?? 0,
                       itemBuilder: (context, index) {
                         final credit = _credits![index];
-                        return GestureDetector(
-                          onTap: () {
-                            final type = credit['media_type'];
-                            context.go('/$type/${credit['id']}');
-                          },
-                          child: Card(
-                            child: SizedBox(
-                              width: 120,
+                        return Container(
+                          width: 140,
+                          margin: const EdgeInsets.all(8.0),
+                          child: GestureDetector(
+                            onTap: () {
+                              final type = credit['media_type'];
+                              context.go('/$type/${credit['id']}');
+                            },
+                            child: Card(
+                              clipBehavior: Clip.antiAlias,
                               child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
                                   if (credit['poster_path'] != null)
                                     CachedNetworkImage(
                                       imageUrl:
                                           'https://image.tmdb.org/t/p/w200${credit['poster_path']}',
-                                      width: 120,
-                                      height: 150,
+                                      width: 140,
+                                      height: 160,
                                       fit: BoxFit.cover,
                                     ),
-                                  Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Text(
-                                      credit['title'] ?? credit['name'] ?? '',
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                      textAlign: TextAlign.center,
+                                  Expanded(
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Text(
+                                        credit['title'] ?? credit['name'] ?? '',
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        textAlign: TextAlign.center,
+                                      ),
                                     ),
                                   ),
                                 ],
