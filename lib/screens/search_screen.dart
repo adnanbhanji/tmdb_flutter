@@ -97,7 +97,7 @@ class _SearchScreenState extends State<SearchScreen> {
         onTap: () => context.go('/person/${item['id']}'),
         child: Card(
           child: ListTile(
-            leading: profilePath == null
+            leading: (profilePath == null || profilePath == '')
                 ? const CircleAvatar(child: Icon(Icons.person))
                 : ClipOval(
                     child: CachedNetworkImage(
@@ -118,7 +118,9 @@ class _SearchScreenState extends State<SearchScreen> {
       );
     } else {
       final posterPath = item['poster_path'];
-      final title = _selectedType == 'tv' ? item['name'] : item['title'];
+      final title = _selectedType == 'tv'
+          ? item['name'] ?? 'Unknown'
+          : item['title'] ?? 'Unknown';
 
       return GestureDetector(
         onTap: () => context.go('/${_selectedType}/${item['id']}'),
@@ -126,7 +128,7 @@ class _SearchScreenState extends State<SearchScreen> {
           child: Column(
             children: [
               Expanded(
-                child: posterPath == null
+                child: (posterPath == null || posterPath == '')
                     ? const Center(child: Icon(Icons.movie, size: 50))
                     : CachedNetworkImage(
                         imageUrl: 'https://image.tmdb.org/t/p/w500$posterPath',
@@ -140,7 +142,7 @@ class _SearchScreenState extends State<SearchScreen> {
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Text(
-                  title ?? 'Unknown',
+                  title,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   textAlign: TextAlign.center,
