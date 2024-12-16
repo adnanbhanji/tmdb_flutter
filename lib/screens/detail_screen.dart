@@ -186,6 +186,8 @@ class _DetailScreenState extends State<DetailScreen> {
   }
 
   Widget _buildActionButtons(BuildContext context) {
+    if (_details == null) return const SizedBox.shrink();
+
     final appState = context.watch<AppState>();
     final isInWatchlist = appState.watchlist.any((m) => m.id == widget.id);
     final ratedMovie = appState.ratedMovies.firstWhere(
@@ -196,18 +198,17 @@ class _DetailScreenState extends State<DetailScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        // Watchlist Button
         ElevatedButton.icon(
           icon: Icon(isInWatchlist ? Icons.bookmark : Icons.bookmark_border),
           label: Text(isInWatchlist ? 'In Watchlist' : 'Add to Watchlist'),
           onPressed: () {
-            if (!isInWatchlist) {
+            if (!isInWatchlist && _details != null) {
               final movie = Movie(
                 id: widget.id,
-                title: _details!['title'] ?? _details!['name'],
+                title: _details!['title'] ?? _details!['name'] ?? 'Unknown',
                 posterPath: _details!['poster_path'],
-                overview: _details!['overview'],
-                voteAverage: _details!['vote_average'].toDouble(),
+                overview: _details!['overview'] ?? '',
+                voteAverage: (_details!['vote_average'] ?? 0.0).toDouble(),
                 releaseDate:
                     _details!['release_date'] ?? _details!['first_air_date'],
               );
@@ -215,23 +216,25 @@ class _DetailScreenState extends State<DetailScreen> {
             }
           },
         ),
-        // Rate Button
         ElevatedButton.icon(
           icon: const Icon(Icons.star),
           label: Text(ratedMovie.id != -1
               ? 'Your Rating: ${ratedMovie.userRating}/10'
               : 'Rate'),
           onPressed: () {
-            showDialog(
-              context: context,
-              builder: (context) => RatingDialog(
-                movieId: widget.id,
-                movieTitle: _details!['title'] ?? _details!['name'],
-                posterPath: _details!['poster_path'],
-                currentRating: ratedMovie.userRating,
-                details: _details!,
-              ),
-            );
+            if (_details != null) {
+              showDialog(
+                context: context,
+                builder: (context) => RatingDialog(
+                  movieId: widget.id,
+                  movieTitle:
+                      _details!['title'] ?? _details!['name'] ?? 'Unknown',
+                  posterPath: _details!['poster_path'],
+                  currentRating: ratedMovie.userRating,
+                  details: _details!,
+                ),
+              );
+            }
           },
         ),
       ],
@@ -258,7 +261,7 @@ class _DetailScreenState extends State<DetailScreen> {
             }
           },
         ),
-        title: Text(_details!['title'] ?? _details!['name']),
+        title: Text(_details!['title'] ?? _details!['name'] ?? 'Details'),
       ),
       body: SingleChildScrollView(
         child: Column(
