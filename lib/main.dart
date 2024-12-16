@@ -76,6 +76,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp.router(
       routerConfig: _router,
+      title: 'TMDB Movies',
       theme: ThemeData.light(),
       darkTheme: ThemeData.dark(),
       themeMode: context.watch<AppState>().isDarkMode
