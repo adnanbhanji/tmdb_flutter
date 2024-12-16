@@ -10,9 +10,6 @@ class TMDBService {
   final Dio _dio = Dio(BaseOptions(
     baseUrl: baseUrl,
     queryParameters: {'api_key': apiKey},
-    validateStatus: (status) {
-      return status! < 500; // Accept all status codes less than 500
-    },
   ));
 
   Future<List<Movie>> getTrendingMovies() async {
@@ -60,17 +57,10 @@ class TMDBService {
     }
   }
 
-  Future<Map<String, dynamic>> getMovieDetails(int id) async {
-    try {
-      final response = await _dio.get('/movie/$id');
-      if (response.statusCode == 200) {
-        return response.data;
-      }
-      throw Exception('Failed to load movie details');
-    } catch (e) {
-      print('Error fetching movie details: $e');
-      rethrow;
-    }
+  Future<Map<String, dynamic>> getMovieDetails(int movieId) async {
+    final response =
+        await _dio.get('/movie/$movieId?append_to_response=credits');
+    return response.data;
   }
 
   Future<Map<String, dynamic>> getTVShowDetails(int tvId) async {
