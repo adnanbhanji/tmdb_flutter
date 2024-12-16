@@ -6,6 +6,7 @@ import '../widgets/media_grid.dart';
 import '../models/movie.dart';
 import '../models/tv_show.dart';
 import 'package:go_router/go_router.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({Key? key}) : super(key: key);
@@ -73,6 +74,59 @@ class _SearchScreenState extends State<SearchScreen> {
     if (!_isLoading) {
       _currentPage++;
       _performSearch(resetResults: false);
+    }
+  }
+
+  Widget _buildSearchResult(dynamic item) {
+    if (_selectedType == 'person') {
+      return GestureDetector(
+        onTap: () => context.go('/person/${item['id']}'),
+        child: Card(
+          child: ListTile(
+            leading: item['profile_path'] != null
+                ? CachedNetworkImage(
+                    imageUrl:
+                        'https://image.tmdb.org/t/p/w200${item['profile_path']}',
+                    width: 50,
+                    height: 50,
+                    fit: BoxFit.cover,
+                  )
+                : const CircleAvatar(child: Icon(Icons.person)),
+            title: Text(item['name'] ?? 'Unknown'),
+            subtitle: Text(item['known_for_department'] ?? ''),
+          ),
+        ),
+      );
+    } else {
+      // Existing movie/TV show display logic
+      return GestureDetector(
+        onTap: () {
+          context.go('/${_selectedType}/${item.id}');
+        },
+        child: Card(
+          child: Column(
+            children: [
+              if (item.posterPath != null)
+                Expanded(
+                  child: CachedNetworkImage(
+                    imageUrl:
+                        'https://image.tmdb.org/t/p/w500${item.posterPath}',
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
+                  item.title,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
     }
   }
 
@@ -148,10 +202,15 @@ class _SearchScreenState extends State<SearchScreen> {
             },
           ),
           Expanded(
-            child: MediaGrid(
-              items: _searchResults,
-              onLoadMore: _loadMore,
-              isLoading: _isLoading,
+            child: GridView.builder(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: 8.0,
+                mainAxisSpacing: 8.0,
+              ),
+              itemCount: _searchResults.length,
+              itemBuilder: (context, index) =>
+                  _buildSearchResult(_searchResults[index]),
             ),
           ),
         ],

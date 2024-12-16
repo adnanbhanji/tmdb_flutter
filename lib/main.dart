@@ -69,6 +69,12 @@ class MyApp extends StatelessWidget {
           seasonNumber: int.parse(state.pathParameters['seasonNumber']!),
         ),
       ),
+      GoRoute(
+        path: '/person/:id',
+        builder: (context, state) => ActorScreen(
+          id: int.parse(state.pathParameters['id']!),
+        ),
+      ),
     ],
   );
 
