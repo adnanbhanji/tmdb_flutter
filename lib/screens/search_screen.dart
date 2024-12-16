@@ -90,6 +90,8 @@ class _SearchScreenState extends State<SearchScreen> {
                     width: 50,
                     height: 50,
                     fit: BoxFit.cover,
+                    errorWidget: (context, url, error) =>
+                        const CircleAvatar(child: Icon(Icons.person)),
                   )
                 : const CircleAvatar(child: Icon(Icons.person)),
             title: Text(item['name'] ?? 'Unknown'),
