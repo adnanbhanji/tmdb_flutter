@@ -24,14 +24,12 @@ class RatingDialog extends StatefulWidget {
 }
 
 class _RatingDialogState extends State<RatingDialog> {
-  double _rating = 5.0;
+  late double _rating;
 
   @override
   void initState() {
     super.initState();
-    if (widget.currentRating != null) {
-      _rating = widget.currentRating!;
-    }
+    _rating = widget.currentRating ?? 5.0;
   }
 
   @override
@@ -73,7 +71,7 @@ class _RatingDialogState extends State<RatingDialog> {
                   widget.details['first_air_date'],
               userRating: _rating,
             );
-            context.read<AppState>().addToRatedMovies(movie);
+            context.read<AppState>().updateRating(movie);
             Navigator.pop(context);
           },
           child: const Text('Save'),

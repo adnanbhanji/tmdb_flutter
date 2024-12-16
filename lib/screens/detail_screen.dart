@@ -200,9 +200,12 @@ class _DetailScreenState extends State<DetailScreen> {
       children: [
         ElevatedButton.icon(
           icon: Icon(isInWatchlist ? Icons.bookmark : Icons.bookmark_border),
-          label: Text(isInWatchlist ? 'In Watchlist' : 'Add to Watchlist'),
+          label: Text(
+              isInWatchlist ? 'Remove from Watchlist' : 'Add to Watchlist'),
           onPressed: () {
-            if (!isInWatchlist && _details != null) {
+            if (isInWatchlist) {
+              context.read<AppState>().removeFromWatchlist(widget.id);
+            } else if (_details != null) {
               final movie = Movie(
                 id: widget.id,
                 title: _details!['title'] ?? _details!['name'] ?? 'Unknown',

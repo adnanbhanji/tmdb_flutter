@@ -135,4 +135,25 @@ class AppState extends ChangeNotifier {
   void _saveRecentSearches() {
     _prefs.setStringList('recentSearches', _recentSearches);
   }
+
+  void removeFromWatchlist(int movieId) {
+    _watchlist.removeWhere((movie) => movie.id == movieId);
+    final watchlistJson =
+        _watchlist.map((movie) => jsonEncode(movie.toJson())).toList();
+    _prefs.setStringList('watchlist', watchlistJson);
+    notifyListeners();
+  }
+
+  void updateRating(Movie movie) {
+    final index = _ratedMovies.indexWhere((m) => m.id == movie.id);
+    if (index != -1) {
+      _ratedMovies[index] = movie;
+    } else {
+      _ratedMovies.add(movie);
+    }
+    final ratedMoviesJson =
+        _ratedMovies.map((movie) => jsonEncode(movie.toJson())).toList();
+    _prefs.setStringList('ratedMovies', ratedMoviesJson);
+    notifyListeners();
+  }
 }
