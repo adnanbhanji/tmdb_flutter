@@ -98,7 +98,6 @@ class _SearchScreenState extends State<SearchScreen> {
         ),
       );
     } else {
-      // Existing movie/TV show display logic
       return GestureDetector(
         onTap: () {
           context.go('/${_selectedType}/${item.id}');
@@ -117,7 +116,7 @@ class _SearchScreenState extends State<SearchScreen> {
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Text(
-                  item.title,
+                  _selectedType == 'tv' ? item.name : item.title,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   textAlign: TextAlign.center,
